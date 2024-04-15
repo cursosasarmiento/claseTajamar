@@ -1,5 +1,6 @@
 ﻿using clase.api.Contracts;
 using clase.api.Models;
+using clase.api.Models.DTOs.MascotaDtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,21 +36,21 @@ namespace clase.api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Mascota m)
+        public async Task<IActionResult> Post(MascotaCreateRequestDto dto)
         {
-            var result = await _service.Create(m);
+            var result = await _service.Create(dto);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Mascota m)
+        public async Task<IActionResult> Put(int id, MascotaUpdateRequestDto dto)
         {
-            if (id != m.Id)
+            if (id != dto.Id)
             {
                 return BadRequest("El ID de la URL no coincide con el ID de la entidad Mascota.");
             }
 
-            await _service.Update(id, m);
+            await _service.Update(id, dto);
 
             return NoContent();
         }

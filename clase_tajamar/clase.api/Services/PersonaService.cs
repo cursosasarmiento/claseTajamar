@@ -1,41 +1,47 @@
-﻿using clase.api.Contracts;
+﻿using AutoMapper;
+using clase.api.Contracts;
 using clase.api.Models;
+using clase.api.Models.DTOs.PersonaDtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace clase.api.Services
 {
-    public class PersonaService(MascotasDbContext context) : IPersonaService
+    public class PersonaService(MascotasDbContext context, IMapper _mapper) : IPersonaService
     {
         private readonly MascotasDbContext _context = context;
+        private readonly IMapper mapper = _mapper;
 
-        public async Task<Persona> Create(Persona entity)
+        public async Task<PersonaSimpleResponseDto> Create(PersonaCreateRequestDto dto)
         {
-            entity.Id = 0;
+            var entity = mapper.Map<Persona>(dto);
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
-            return entity;
+            return mapper.Map<PersonaSimpleResponseDto>(entity);
         }
 
         public async Task Delete(int id)
         {
             var persona = await GetById(id) ?? throw new Exception($"No se encuentra a la persona con id: {id}");
-            _context.Personas.Remove(persona);
+            _context.Personas.Remove(mapper.Map<Persona>(persona));
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Persona>> GetAll()
+        public async Task<IEnumerable<PersonaSimpleResponseDto>> GetAll()
         {
-            return await _context.Personas.Include(x => x.Mascotas).ThenInclude(x => x.MascotaTipo).ToListAsync();
+            var result = await _context.Personas.Include(x => x.Mascotas).ThenInclude(x => x.MascotaTipo).ToListAsync();
+            return mapper.Map< IEnumerable<PersonaSimpleResponseDto>>(result);
         }
 
-        public async Task<Persona> GetById(int id)
+        public async Task<PersonaFullResponseDto> GetById(int id)
         {
             var result = await _context.Personas.Include(x => x.Mascotas).ThenInclude(x => x.MascotaTipo).FirstOrDefaultAsync(x => x.Id == id);
-            return result!;
+            return mapper.Map< PersonaFullResponseDto > (result);
         }
+        
 
-        public async Task Update(int id, Persona entity)
+        public async Task Update(int id, PersonaUpdateRequestDto dto)
         {
+            var entity = mapper.Map<Persona>(dto);
             _context.Entry(entity).State = EntityState.Modified;
 
             try

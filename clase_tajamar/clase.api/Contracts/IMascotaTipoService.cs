@@ -1,10 +1,11 @@
 ﻿using clase.api.Models;
+using clase.api.Models.DTOs.MascotaTipoDto;
 
 namespace clase.api.Contracts
 {
     public interface IMascotaTipoService
     {
-        Task<MascotaTipo> Create(MascotaTipo entity);
-        Task<MascotaTipo> GetById(int id);
+        Task<MascotaTipoFullResponseDto> Create(MascotaTipoCreateRequestDto entity);
+        Task<MascotaTipoFullResponseDto> GetById(int id);
     }
 }

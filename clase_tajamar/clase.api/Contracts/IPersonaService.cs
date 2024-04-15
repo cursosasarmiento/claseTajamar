@@ -1,13 +1,14 @@
 ﻿using clase.api.Models;
+using clase.api.Models.DTOs.PersonaDtos;
 
 namespace clase.api.Contracts
 {
     public interface IPersonaService
     {
-        Task<Persona> GetById(int id);
-        Task<IEnumerable<Persona>> GetAll();
-        Task<Persona> Create(Persona entity);
-        Task Update(int id, Persona entity);
+        Task<PersonaFullResponseDto> GetById(int id);
+        Task<IEnumerable<PersonaSimpleResponseDto>> GetAll();
+        Task<PersonaSimpleResponseDto> Create(PersonaCreateRequestDto entity);
+        Task Update(int id, PersonaUpdateRequestDto entity);
         Task Delete(int id);
     }
 }
