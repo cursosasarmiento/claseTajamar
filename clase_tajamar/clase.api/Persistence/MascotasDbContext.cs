@@ -1,7 +1,7 @@
 ﻿using clase.api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace clase.api
+namespace clase.api.Persistence
 {
     public class MascotasDbContext : DbContext
     {
@@ -18,10 +18,11 @@ namespace clase.api
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Persona>(entity => { 
+            builder.Entity<Persona>(entity =>
+            {
                 entity.HasKey(p => p.Id);
-                entity.HasMany<Mascota>(x => x.Mascotas);
-            });                
+                entity.HasMany(x => x.Mascotas);
+            });
 
             builder.Entity<Mascota>(entity =>
             {
@@ -38,8 +39,8 @@ namespace clase.api
             {
                 entity.HasKey(x => x.Id);
             });
-               
-                
+
+
 
         }
     }
