@@ -1,4 +1,5 @@
-﻿using clase.api.Models;
+﻿using clase.api.Contracts;
+using clase.api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,14 +8,9 @@ namespace clase.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PersonasController : ControllerBase
+    public class PersonasController(IPersonaService service) : ControllerBase
     {
-        private readonly MascotasDbContext _context;
-
-        public PersonasController(MascotasDbContext context)
-        {
-            _context = context;
-        }
+        private readonly IPersonaService _service = service;
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -23,17 +19,17 @@ namespace clase.api.Controllers
             {
                 return BadRequest("El id no puede ser 0");
             }
-            var result = await _context.Personas.Include(x=>x.Mascotas).ThenInclude(x=>x.MascotaTipo).FirstOrDefaultAsync(x=>x.Id == id);
+            var result = await _service.GetById(id);
             if(result == null)
-                return NotFound();
+                return NotFound($"No se encuentra a la persona con el id: {id}");
             return Ok(result);
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await _context.Personas.Include(x=>x.Mascotas).ThenInclude(x => x.MascotaTipo).ToListAsync();
-            if(result == null || result.Count == 0)
+            var result = await _service.GetAll();
+            if(result == null || !result.Any())
                 return NotFound();
             return Ok(result);
         }
@@ -41,10 +37,8 @@ namespace clase.api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(Persona p)
         {
-            p.Id = 0;
-            await _context.AddAsync(p);
-            await _context.SaveChangesAsync();
-            return Ok(p);
+            var result = await _service.Create(p);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -55,27 +49,7 @@ namespace clase.api.Controllers
                 return BadRequest("El ID de la URL no coincide con el ID de la entidad Persona.");
             }
 
-            _context.Entry(persona).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Personas.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "No se pudo actualizar la persona: " + ex.Message);
-            }
+            await _service.Update(id, persona);
 
             return NoContent();
         }
@@ -83,16 +57,9 @@ namespace clase.api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var persona = await _context.Personas.FindAsync(id);
-            if (persona == null)
-            {
-                return NotFound();
-            }
+            await _service.Delete(id);
 
-            _context.Personas.Remove(persona);
-            await _context.SaveChangesAsync();
-
-            return NoContent();  // Respuesta estándar para indicar que la entidad se eliminó correctamente
+            return NoContent();
         }
 
     }
