@@ -1,5 +1,8 @@
 using clase.api;
+using clase.api.Contracts;
+using clase.api.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +13,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 var mascotasConnectionString = builder.Configuration.GetConnectionString("mascotasConnectionString");
 builder.Services.AddDbContext<MascotasDbContext>(options =>
 {
     options.UseSqlServer(mascotasConnectionString);
 });
+
+builder.Services.AddScoped<IPersonaService, PersonaService>();
+builder.Services.AddScoped<IMascotaService, MascotaService>();
+builder.Services.AddScoped<IMascotaTipoService, MascotaTipoService>();
 
 var app = builder.Build();
 

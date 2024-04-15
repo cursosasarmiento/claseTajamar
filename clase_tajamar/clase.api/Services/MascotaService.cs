@@ -1,59 +1,69 @@
-﻿using clase.api.Contracts;
+﻿using AutoMapper;
+using clase.api.Contracts;
 using clase.api.Models;
+using clase.api.Models.DTOs.MascotaDtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace clase.api.Services
 {
-    public class MascotaService(MascotasDbContext context, IPersonaService personaService, IMascotaTipoService mascotaTipoService) : IMascotaService
+    public class MascotaService(MascotasDbContext context, IPersonaService personaService, IMascotaTipoService mascotaTipoService, IMapper _mapper) : IMascotaService
     {
         private readonly MascotasDbContext _context = context;
         private readonly IPersonaService _personaService = personaService;
         private readonly IMascotaTipoService _macotaTipoService = mascotaTipoService;
+        private readonly IMapper mapper = _mapper;
 
-        public async Task<Mascota> Create(Mascota entity)
+        public async Task<MascotaSimpleResponseDto> Create(MascotaCreateRequestDto dto)
         {
-            entity.Id = 0;
-            if (!entity.PropietarioId.HasValue) throw new Exception("Una mascota debe tener un propietario");
-            var propietario = await _personaService.GetById(entity.PropietarioId!.Value);
-            var tipo = await _macotaTipoService.GetById(entity.MascotaTipoId);
+
+            var propietario = await _context.Personas.FindAsync(dto.PropietarioId);
+            var tipo = await _context.MascotaTipos.FindAsync(dto.MascotaTipoId);
             if (propietario == null)
                 throw new Exception("El id del propietario no se encuentra en base de datos");
             if (tipo == null)
                 throw new Exception("El id del tipo de mascota no se encuentra en base de datos");
+
+            var entity = mapper.Map<Mascota>(dto);
+
+            // Asigna directamente las entidades obtenidas del contexto
             entity.Propietario = propietario;
             entity.MascotaTipo = tipo;
+
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
-            return entity;
+
+            return mapper.Map<MascotaSimpleResponseDto>(entity);
         }
 
         public async Task Delete(int id)
         {
             var Mascota = await GetById(id) ?? throw new Exception($"No se encuentra a la Mascota con id: {id}");
-            _context.Mascotas.Remove(Mascota);
+            _context.Mascotas.Remove(mapper.Map<Mascota>(Mascota));
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Mascota>> GetAll()
+        public async Task<IEnumerable<MascotaSimpleResponseDto>> GetAll()
         {
-            return await _context.Mascotas.Include(x => x.MascotaTipo).ToListAsync();
+            var response =  await _context.Mascotas.Include(x => x.MascotaTipo).ToListAsync();
+            return mapper.Map< IEnumerable<MascotaSimpleResponseDto>>(response);
         }
 
-        public async Task<Mascota> GetById(int id)
+        public async Task<MascotaFullResponseDto> GetById(int id)
         {
             var result = await _context.Mascotas.Include(x => x.MascotaTipo).FirstOrDefaultAsync(x => x.Id == id);
-            return result!;
+            return mapper.Map<MascotaFullResponseDto>(result);
         }
 
-        public async Task Update(int id, Mascota entity)
+        public async Task Update(int id, MascotaUpdateRequestDto dto)
         {
-            if (!entity.PropietarioId.HasValue) throw new Exception("Una mascota debe tener un propietario");
-            var propietario = await _personaService.GetById(entity.PropietarioId!.Value);
-            var tipo = await _macotaTipoService.GetById(entity.MascotaTipoId);
+            var propietario = await _context.Personas.FindAsync(dto.PropietarioId);
+            var tipo = await _context.MascotaTipos.FindAsync(dto.MascotaTipoId);
             if (propietario == null)
                 throw new Exception("El id del propietario no se encuentra en base de datos");
             if (tipo == null)
                 throw new Exception("El id del tipo de mascota no se encuentra en base de datos");
+
+            var entity = mapper.Map<Mascota>(dto);
 
             _context.Entry(entity).State = EntityState.Modified;
 

@@ -1,5 +1,6 @@
 ﻿using clase.api.Contracts;
 using clase.api.Models;
+using clase.api.Models.DTOs.PersonaDtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,21 +36,21 @@ namespace clase.api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Persona p)
+        public async Task<IActionResult> Post(PersonaCreateRequestDto dto)
         {
-            var result = await _service.Create(p);
+            var result = await _service.Create(dto);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Persona persona)
+        public async Task<IActionResult> Put(int id, PersonaUpdateRequestDto dto)
         {
-            if (id != persona.Id)
+            if (id != dto.Id)
             {
                 return BadRequest("El ID de la URL no coincide con el ID de la entidad Persona.");
             }
 
-            await _service.Update(id, persona);
+            await _service.Update(id, dto);
 
             return NoContent();
         }

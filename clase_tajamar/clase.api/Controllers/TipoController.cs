@@ -1,5 +1,6 @@
 ﻿using clase.api.Contracts;
 using clase.api.Models;
+using clase.api.Models.DTOs.MascotaTipoDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +13,9 @@ namespace clase.api.Controllers
         private readonly IMascotaTipoService _service = service;
 
         [HttpPost]
-        public async Task<IActionResult> Post(MascotaTipo mt)
+        public async Task<IActionResult> Post(MascotaTipoCreateRequestDto dto)
         {
-            var response = await _service.Create(mt);
+            var response = await _service.Create(dto);
             return Ok(response);
         }
 
