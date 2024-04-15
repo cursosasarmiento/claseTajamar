@@ -1,5 +1,7 @@
-using clase.api;
-using clase.api.Contracts;
+using clase.api.Contracts.Repositories;
+using clase.api.Contracts.Services;
+using clase.api.Persistence;
+using clase.api.Persistence.Repositories;
 using clase.api.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -23,6 +25,10 @@ builder.Services.AddDbContext<MascotasDbContext>(options =>
 builder.Services.AddScoped<IPersonaService, PersonaService>();
 builder.Services.AddScoped<IMascotaService, MascotaService>();
 builder.Services.AddScoped<IMascotaTipoService, MascotaTipoService>();
+
+builder.Services.AddScoped<IPersonaRepository, PersonaSqlRepository>();
+builder.Services.AddScoped<IMascotaRepository, MascotaSqlRepository>();
+builder.Services.AddScoped<IMascotaTipoRepository, MascotaTipoSqlRepository>();
 
 var app = builder.Build();
 

@@ -1,7 +1,7 @@
 ﻿using clase.api.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace clase.api
+namespace clase.api.Persistence
 {
     public class MascotasDbSeeder
     {

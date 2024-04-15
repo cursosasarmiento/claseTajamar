@@ -1,7 +1,7 @@
 ﻿using clase.api.Models;
 using clase.api.Models.DTOs.MascotaDtos;
 
-namespace clase.api.Contracts
+namespace clase.api.Contracts.Services
 {
     public interface IMascotaService
     {
